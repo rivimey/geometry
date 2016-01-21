@@ -56,6 +56,14 @@ class RectangleTest extends \PHPUnit_Framework_TestCase
         $this->assertSame(16, $rect2->area());
     }
 
+    public function testCenter()
+    {
+        $rect = new Rectangle(0, 0, 4, 6);
+        list($centerX, $centerY) = $rect->center();
+        $this->assertSame(2, $centerX);
+        $this->assertSame(3, $centerY);
+    }
+
     public function testNormalized()
     {
         // All four possibilities for defining corners

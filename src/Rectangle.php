@@ -60,6 +60,20 @@ class Rectangle
     }
 
     /**
+     * Gets the center x and y of this rectangle.
+     *
+     * @return float[] A two-element array, where the first element is the
+     *                   center x and the second element is the center y.
+     */
+    public function center()
+    {
+        return [
+            ($this->x1 + $this->x2) / 2,
+            ($this->y1 + $this->y2) / 2
+        ];
+    }
+
+    /**
      * Returns an identical rectangle which has x1, y1 in the lower left and
      * x2, y2 in the upper right.
      *
@@ -160,8 +174,7 @@ class Rectangle
      */
     public function scaledCenter($x, $y)
     {
-        $centerX = ($this->x1 + $this->x2) / 2;
-        $centerY = ($this->y1 + $this->y2) / 2;
+        list($centerX, $centerY) = $this->center();
 
         return $this
             ->translated(-$centerX, -$centerY)
