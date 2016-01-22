@@ -95,6 +95,29 @@ class Rectangle
     }
 
     /**
+     * Checks to see if the rectangle is identical to another rectangle.
+     *
+     * @param  Rectangle $rect
+     * @return bool
+     */
+    public function identicalTo(Rectangle $rect)
+    {
+        $thisMinX = min($this->x1, $this->x2);
+        $thisMinY = min($this->y1, $this->y2);
+        $thisMaxX = max($this->x1, $this->x2);
+        $thisMaxY = max($this->y1, $this->y2);
+        $rectMinX = min($rect->x1, $rect->x2);
+        $rectMinY = min($rect->y1, $rect->y2);
+        $rectMaxX = max($rect->x1, $rect->x2);
+        $rectMaxY = max($rect->y1, $rect->y2);
+
+        return $thisMinX === $rectMinX
+            && $thisMinY === $rectMinY
+            && $thisMaxX === $rectMaxX
+            && $thisMaxY === $rectMaxY;
+    }
+
+    /**
      * Checks to see if the rectangle is intersecting another rectangle.
      *
      * @param  Rectangle $other

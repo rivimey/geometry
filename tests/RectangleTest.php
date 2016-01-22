@@ -64,6 +64,21 @@ class RectangleTest extends \PHPUnit_Framework_TestCase
         $this->assertSame(3, $centerY);
     }
 
+    public function testIdentical()
+    {
+        $rect1 = new Rectangle(0, 0, 4, 4);
+        $rect2 = new Rectangle(2, 2, 6, 6);
+        $this->assertFalse($rect1->identicalTo($rect2));
+
+        $rect1 = new Rectangle(0, 0, 4, 4);
+        $rect2 = new Rectangle(0, 0, 4, 4);
+        $this->assertTrue($rect1->identicalTo($rect2));
+
+        $rect1 = new Rectangle(0, 0, 4, 4);
+        $rect2 = new Rectangle(0, 4, 4, 0);
+        $this->assertTrue($rect1->identicalTo($rect2));
+    }
+
     public function testNormalized()
     {
         // All four possibilities for defining corners
