@@ -145,10 +145,10 @@ class Rectangle
         $normThis = $this->normalized();
         $normOther = $other->normalized();
 
-        return $normThis->x1 < $normOther->x1
-            && $normThis->x2 > $normOther->x2
-            && $normThis->y1 < $normOther->y1
-            && $normThis->y2 > $normOther->y2;
+        return $normThis->x1 <= $normOther->x1
+            && $normThis->x2 >= $normOther->x2
+            && $normThis->y1 <= $normOther->y1
+            && $normThis->y2 >= $normOther->y2;
     }
 
     /**

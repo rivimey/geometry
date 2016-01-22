@@ -147,6 +147,11 @@ class RectangleTest extends \PHPUnit_Framework_TestCase
         $rect2 = new Rectangle(1, 1, 3, 3);
         $this->assertTrue($rect1->contains($rect2));
 
+        // Identical rectangles
+        $rect1 = new Rectangle(0, 0, 4, 4);
+        $rect2 = new Rectangle(0, 0, 4, 4);
+        $this->assertTrue($rect1->contains($rect2));
+
         // Non-normalized rectangles
         $rect1 = new Rectangle(0, 0, 4, 4);
         $rect2 = new Rectangle(3, 3, 1, 1);
