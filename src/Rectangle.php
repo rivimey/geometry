@@ -23,13 +23,15 @@ class Rectangle
     }
 
     /**
-     * Constructs a new rectangle where x1 and y1 define one corner, and
-     * x2 and y2 define the opposite corner.
+     * Constructs a new rectangle where minX and minY define the lower left
+     * corner, and maxX and maxY define the upper right corner.
      *
-     * @param float $x1
-     * @param float $y1
-     * @param float $x2
-     * @param float $y2
+     * This constructor will ensure that the resulting rectangle is normalized.
+     *
+     * @param float $minX
+     * @param float $minY
+     * @param float $maxX
+     * @param float $maxY
      */
     public function __construct($minX, $minY, $maxX, $maxY)
     {
@@ -114,7 +116,7 @@ class Rectangle
     /**
      * Checks to see if the rectangle fully contains another rectangle.
      *
-     * @param  Rectangle $other
+     * @param  Rectangle $rect
      * @return bool
      */
     public function contains(Rectangle $rect)
