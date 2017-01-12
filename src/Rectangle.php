@@ -7,10 +7,20 @@ namespace Geometry;
  */
 class Rectangle
 {
-    public $x1;
-    public $y1;
-    public $x2;
-    public $y2;
+    private $minX;
+    private $minY;
+    private $maxX;
+    private $maxY;
+
+    public function __get($name)
+    {
+        return $this->$name;
+    }
+
+    public function __set($name, $value)
+    {
+        throw new ImmutableException("Cannot set `$name` directly because Rectangles are immutable.");
+    }
 
     /**
      * Constructs a new rectangle where x1 and y1 define one corner, and
@@ -21,32 +31,32 @@ class Rectangle
      * @param float $x2
      * @param float $y2
      */
-    public function __construct($x1, $y1, $x2, $y2)
+    public function __construct($minX, $minY, $maxX, $maxY)
     {
-        $this->x1 = $x1;
-        $this->y1 = $y1;
-        $this->x2 = $x2;
-        $this->y2 = $y2;
+        $this->minX = min($minX, $maxX);
+        $this->minY = min($minY, $maxY);
+        $this->maxX = max($minX, $maxX);
+        $this->maxY = max($minY, $maxY);
     }
 
     /**
-     * Gets the absolute width of this rectangle.
+     * Gets the width of this rectangle.
      *
      * @return float
      */
     public function width()
     {
-        return abs($this->x2 - $this->x1);
+        return $this->maxX - $this->minX;
     }
 
     /**
-     * Gets the absolute height of this rectangle.
+     * Gets the height of this rectangle.
      *
      * @return float
      */
     public function height()
     {
-        return abs($this->y2 - $this->y1);
+        return $this->maxY - $this->minY;
     }
 
     /**
@@ -68,30 +78,9 @@ class Rectangle
     public function center()
     {
         return [
-            ($this->x1 + $this->x2) / 2,
-            ($this->y1 + $this->y2) / 2
+            ($this->minX + $this->maxX) / 2,
+            ($this->minY + $this->maxY) / 2
         ];
-    }
-
-    /**
-     * Returns an identical rectangle which has x1, y1 in the lower left and
-     * x2, y2 in the upper right.
-     *
-     * @return Rectangle
-     */
-    public function normalized()
-    {
-        $minX = min($this->x1, $this->x2);
-        $maxX = max($this->x1, $this->x2);
-        $minY = min($this->y1, $this->y2);
-        $maxY = max($this->y1, $this->y2);
-
-        return new Rectangle(
-            $minX,
-            $minY,
-            $maxX,
-            $maxY
-        );
     }
 
     /**
@@ -102,36 +91,24 @@ class Rectangle
      */
     public function identicalTo(Rectangle $rect)
     {
-        $thisMinX = min($this->x1, $this->x2);
-        $thisMinY = min($this->y1, $this->y2);
-        $thisMaxX = max($this->x1, $this->x2);
-        $thisMaxY = max($this->y1, $this->y2);
-        $rectMinX = min($rect->x1, $rect->x2);
-        $rectMinY = min($rect->y1, $rect->y2);
-        $rectMaxX = max($rect->x1, $rect->x2);
-        $rectMaxY = max($rect->y1, $rect->y2);
-
-        return $thisMinX === $rectMinX
-            && $thisMinY === $rectMinY
-            && $thisMaxX === $rectMaxX
-            && $thisMaxY === $rectMaxY;
+        return $this->minX === $rect->minX
+            && $this->minY === $rect->minY
+            && $this->maxX === $rect->maxX
+            && $this->maxY === $rect->maxY;
     }
 
     /**
      * Checks to see if the rectangle is intersecting another rectangle.
      *
-     * @param  Rectangle $other
+     * @param  Rectangle $rect
      * @return bool
      */
-    public function intersects(Rectangle $other)
+    public function intersects(Rectangle $rect)
     {
-        $normThis = $this->normalized();
-        $normOther = $other->normalized();
-
-        return $normThis->x1 < $normOther->x2
-            && $normThis->x2 > $normOther->x1
-            && $normThis->y1 < $normOther->y2
-            && $normThis->y2 > $normOther->y1;
+        return $this->minX < $rect->maxX
+            && $this->maxX > $rect->minX
+            && $this->minY < $rect->maxY
+            && $this->maxY > $rect->minY;
     }
 
     /**
@@ -140,15 +117,12 @@ class Rectangle
      * @param  Rectangle $other
      * @return bool
      */
-    public function contains(Rectangle $other)
+    public function contains(Rectangle $rect)
     {
-        $normThis = $this->normalized();
-        $normOther = $other->normalized();
-
-        return $normThis->x1 <= $normOther->x1
-            && $normThis->x2 >= $normOther->x2
-            && $normThis->y1 <= $normOther->y1
-            && $normThis->y2 >= $normOther->y2;
+        return $this->minX <= $rect->minX
+            && $this->maxX >= $rect->maxX
+            && $this->minY <= $rect->minY
+            && $this->maxY >= $rect->maxY;
     }
 
     /**
@@ -162,10 +136,10 @@ class Rectangle
     public function translated($x, $y)
     {
         return new Rectangle(
-            $this->x1 + $x,
-            $this->y1 + $y,
-            $this->x2 + $x,
-            $this->y2 + $y
+            $this->minX + $x,
+            $this->minY + $y,
+            $this->maxX + $x,
+            $this->maxY + $y
         );
     }
 
@@ -180,10 +154,10 @@ class Rectangle
     public function scaledOrigin($x, $y)
     {
         return new Rectangle(
-            $this->x1 * $x,
-            $this->y1 * $y,
-            $this->x2 * $x,
-            $this->y2 * $y
+            $this->minX * $x,
+            $this->minY * $y,
+            $this->maxX * $x,
+            $this->maxY * $y
         );
     }
 
@@ -215,12 +189,11 @@ class Rectangle
      */
     public function inflated($x, $y)
     {
-        $norm = $this->normalized();
         return new Rectangle(
-            $norm->x1 - $x,
-            $norm->y1 - $y,
-            $norm->x2 + $x,
-            $norm->y2 + $y
+            $this->minX - $x,
+            $this->minY - $y,
+            $this->maxX + $x,
+            $this->maxY + $y
         );
     }
 }

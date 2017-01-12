@@ -2,49 +2,56 @@
 
 namespace GeometryTests;
 
+use Geometry\ImmutableException;
 use Geometry\Rectangle;
 
 class RectangleTest extends \PHPUnit_Framework_TestCase
 {
     private function assertNormalized(Rectangle $rect)
     {
-        $this->assertTrue($rect->x1 <= $rect->x2);
-        $this->assertTrue($rect->y1 <= $rect->y2);
+        $this->assertTrue($rect->minX <= $rect->maxX);
+        $this->assertTrue($rect->minY <= $rect->maxY);
     }
 
     private function assertIdentical(Rectangle $expected, Rectangle $actual)
     {
-        $expectedMinX = min($expected->x1, $expected->x2);
-        $expectedMinY = min($expected->y1, $expected->y2);
-        $expectedMaxX = max($expected->x1, $expected->x2);
-        $expectedMaxY = max($expected->y1, $expected->y2);
-        $actualMinX = min($actual->x1, $actual->x2);
-        $actualMinY = min($actual->y1, $actual->y2);
-        $actualMaxX = max($actual->x1, $actual->x2);
-        $actualMaxY = max($actual->y1, $actual->y2);
+        $this->assertTrue($actual->identicalTo($expected));
+    }
 
-        $this->assertSame($expectedMinX, $actualMinX);
-        $this->assertSame($expectedMinY, $actualMinY);
-        $this->assertSame($expectedMaxX, $actualMaxX);
-        $this->assertSame($expectedMaxY, $actualMaxY);
+    public function testConstructor()
+    {
+        $this->assertNormalized(new Rectangle(0, 0, 4, 4));
+        $this->assertNormalized(new Rectangle(4, 4, 0, 0));
+    }
+
+    public function testGetValidProperties()
+    {
+        $rect = new Rectangle(1, 2, 3, 4);
+
+        $this->assertSame(1, $rect->minX);
+        $this->assertSame(2, $rect->minY);
+        $this->assertSame(3, $rect->maxX);
+        $this->assertSame(4, $rect->maxY);
+    }
+
+    public function testCannotSetProperties()
+    {
+        $this->expectException(ImmutableException::class);
+
+        $rect = new Rectangle(0, 0, 4, 4);
+        $rect->x1 = 3;
     }
 
     public function testWidth()
     {
-        $rect1 = new Rectangle(0, 0, 4, 4);
-        $this->assertSame(4, $rect1->width());
-
-        $rect2 = new Rectangle(0, 0, -4, -4);
-        $this->assertSame(4, $rect2->width());
+        $rect1 = new Rectangle(-1, -1, 4, 4);
+        $this->assertSame(5, $rect1->width());
     }
 
     public function testHeight()
     {
-        $rect1 = new Rectangle(0, 0, 4, 4);
-        $this->assertSame(4, $rect1->height());
-
-        $rect2 = new Rectangle(0, 0, -4, -4);
-        $this->assertSame(4, $rect2->height());
+        $rect1 = new Rectangle(-1, -1, 4, 4);
+        $this->assertSame(5, $rect1->height());
     }
 
     public function testArea()
@@ -52,7 +59,7 @@ class RectangleTest extends \PHPUnit_Framework_TestCase
         $rect1 = new Rectangle(0, 0, 4, 4);
         $this->assertSame(16, $rect1->area());
 
-        $rect2 = new Rectangle(0, 0, 4, -4);
+        $rect2 = new Rectangle(0, -4, 4, 0);
         $this->assertSame(16, $rect2->area());
     }
 
@@ -73,38 +80,6 @@ class RectangleTest extends \PHPUnit_Framework_TestCase
         $rect1 = new Rectangle(0, 0, 4, 4);
         $rect2 = new Rectangle(0, 0, 4, 4);
         $this->assertTrue($rect1->identicalTo($rect2));
-
-        $rect1 = new Rectangle(0, 0, 4, 4);
-        $rect2 = new Rectangle(0, 4, 4, 0);
-        $this->assertTrue($rect1->identicalTo($rect2));
-    }
-
-    public function testNormalized()
-    {
-        // All four possibilities for defining corners
-        $rect1 = new Rectangle(0, 0, 4, 4);
-        $rect1Norm = $rect1->normalized();
-        $this->assertNormalized($rect1Norm);
-        $this->assertNotSame($rect1Norm, $rect1);
-        $this->assertIdentical($rect1Norm, $rect1);
-
-        $rect2 = new Rectangle(4, 4, 0, 0);
-        $rect2Norm = $rect2->normalized();
-        $this->assertNormalized($rect2Norm);
-        $this->assertNotSame($rect2Norm, $rect2);
-        $this->assertIdentical($rect2Norm, $rect2);
-
-        $rect3 = new Rectangle(0, 4, 4, 0);
-        $rect3Norm = $rect3->normalized();
-        $this->assertNormalized($rect3Norm);
-        $this->assertNotSame($rect3Norm, $rect3);
-        $this->assertIdentical($rect3Norm, $rect3);
-
-        $rect4 = new Rectangle(4, 0, 0, 4);
-        $rect4Norm = $rect4->normalized();
-        $this->assertNormalized($rect4Norm);
-        $this->assertNotSame($rect4Norm, $rect4);
-        $this->assertIdentical($rect4Norm, $rect4);
     }
 
     public function testIntersects()
@@ -122,11 +97,6 @@ class RectangleTest extends \PHPUnit_Framework_TestCase
         // Normal case
         $rect1 = new Rectangle(0, 0, 4, 4);
         $rect2 = new Rectangle(2, 2, 6, 6);
-        $this->assertTrue($rect1->intersects($rect2));
-
-        // Non-normalized rectangles
-        $rect1 = new Rectangle(0, 0, 4, 4);
-        $rect2 = new Rectangle(6, 6, 2, 2);
         $this->assertTrue($rect1->intersects($rect2));
     }
 
@@ -151,19 +121,14 @@ class RectangleTest extends \PHPUnit_Framework_TestCase
         $rect1 = new Rectangle(0, 0, 4, 4);
         $rect2 = new Rectangle(0, 0, 4, 4);
         $this->assertTrue($rect1->contains($rect2));
-
-        // Non-normalized rectangles
-        $rect1 = new Rectangle(0, 0, 4, 4);
-        $rect2 = new Rectangle(3, 3, 1, 1);
-        $this->assertTrue($rect1->contains($rect2));
     }
 
     public function testTranslated()
     {
-        $rect = new Rectangle(4, 4, 0, 0);
+        $rect = new Rectangle(0, 0, 4, 4);
         $rectTranslated = $rect->translated(2, 2);
-        $this->assertIdentical(new Rectangle(6, 6, 2, 2), $rectTranslated);
-        $this->assertSame(6, $rectTranslated->x1);
+        $this->assertIdentical(new Rectangle(2, 2, 6, 6), $rectTranslated);
+        $this->assertSame(2, $rectTranslated->minX);
         $this->assertNotSame($rectTranslated, $rect);
     }
 
