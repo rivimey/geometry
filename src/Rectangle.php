@@ -5,8 +5,7 @@ namespace Geometry;
 /**
  * Defines a rectangle in Cartesian coordinates.
  */
-class Rectangle
-{
+class Rectangle extends Shape {
     private $minX;
     private $minY;
     private $maxX;
